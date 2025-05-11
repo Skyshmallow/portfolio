@@ -450,6 +450,17 @@
             
             .hamburger {
                 display: block;
+                padding: 10px;
+                z-index: 101;
+                transition: all 0.3s ease;
+            }
+            
+            .hamburger i {
+                font-size: 26px;
+            }
+            
+            .hamburger:active {
+                transform: scale(0.95);
             }
             
             .social-icons {
@@ -551,6 +562,80 @@
             }
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile navigation toggle
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('navLinks');
+            
+            // Debug helper
+            console.log('Hamburger element:', hamburger);
+            console.log('Nav links element:', navLinks);
+            
+            if (hamburger && navLinks) {
+                hamburger.addEventListener('click', function(e) {
+                    console.log('Hamburger clicked');
+                    e.stopPropagation();
+                    navLinks.classList.toggle('active');
+                    this.innerHTML = navLinks.classList.contains('active') 
+                        ? '<i class="fas fa-times"></i>' 
+                        : '<i class="fas fa-bars"></i>';
+                    console.log('Nav menu toggled, active:', navLinks.classList.contains('active'));
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (navLinks.classList.contains('active') && 
+                        !navLinks.contains(e.target) && 
+                        e.target !== hamburger && 
+                        !hamburger.contains(e.target)) {
+                        navLinks.classList.remove('active');
+                        hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+                    }
+                });
+                
+                // Smooth scrolling for navigation links
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // Close mobile menu if open
+                        if (navLinks.classList.contains('active')) {
+                            navLinks.classList.remove('active');
+                            hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+                        }
+                        
+                        const targetId = this.getAttribute('href');
+                        if (targetId === '#') return;
+                        
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                });
+            }
+            
+            // Better touch experience for projects
+            if ('ontouchstart' in window || navigator.maxTouchPoints) {
+                document.querySelectorAll('.project-card').forEach(card => {
+                    card.classList.add('touch-device');
+                    
+                    // Optional: Add tap highlight animation for mobile
+                    card.addEventListener('touchstart', function() {
+                        this.classList.add('touch-active');
+                    });
+                    
+                    card.addEventListener('touchend', function() {
+                        this.classList.remove('touch-active');
+                    });
+                });
+            }
+        });
+    </script>
 </head>
 <body>
     <!-- Header -->
@@ -782,69 +867,5 @@
             <p>Made with <i class="fas fa-heart" style="color: var(--accent-blue);"></i> and passion for development</p>
         </div>
     </footer>
-    
-    <script>
-        // Mobile navigation toggle
-        const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('navLinks');
-        
-        hamburger.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            hamburger.innerHTML = navLinks.classList.contains('active') 
-                ? '<i class="fas fa-times"></i>' 
-                : '<i class="fas fa-bars"></i>';
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (navLinks.classList.contains('active') && 
-                !navLinks.contains(e.target) && 
-                e.target !== hamburger && 
-                !hamburger.contains(e.target)) {
-                navLinks.classList.remove('active');
-                hamburger.innerHTML = '<i class="fas fa-bars"></i>';
-            }
-        });
-        
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Close mobile menu if open
-                if (navLinks.classList.contains('active')) {
-                    navLinks.classList.remove('active');
-                    hamburger.innerHTML = '<i class="fas fa-bars"></i>';
-                }
-                
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-        
-        // Better touch experience for projects
-        if ('ontouchstart' in window || navigator.maxTouchPoints) {
-            document.querySelectorAll('.project-card').forEach(card => {
-                card.classList.add('touch-device');
-                
-                // Optional: Add tap highlight animation for mobile
-                card.addEventListener('touchstart', function() {
-                    this.classList.add('touch-active');
-                });
-                
-                card.addEventListener('touchend', function() {
-                    this.classList.remove('touch-active');
-                });
-            });
-        }
-    </script>
 </body>
 </html>
