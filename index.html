@@ -561,6 +561,49 @@
                 backface-visibility: hidden;
             }
         }
+
+        /* Language Switcher Styles */
+        .language-switcher {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .lang-btn:hover {
+            background-color: rgba(66, 133, 244, 0.1);
+            border-color: var(--accent-blue);
+        }
+
+        .lang-btn i {
+            margin-left: 8px;
+            color: var(--accent-blue);
+        }
+
+        .lang-text {
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .language-switcher {
+                position: absolute;
+                right: 70px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -634,6 +677,61 @@
                     });
                 });
             }
+
+            // Language Switcher Functionality
+            const langToggle = document.getElementById('langToggle');
+            const langText = langToggle.querySelector('.lang-text');
+            let currentLang = 'en';
+
+            langToggle.addEventListener('click', function() {
+                // Toggle language
+                currentLang = currentLang === 'en' ? 'ru' : 'en';
+                
+                // Update button text
+                langText.textContent = currentLang.toUpperCase();
+                
+                // Show/hide elements based on language
+                document.querySelectorAll('.lang-en').forEach(el => {
+                    el.style.display = currentLang === 'en' ? '' : 'none';
+                });
+                
+                document.querySelectorAll('.lang-ru').forEach(el => {
+                    el.style.display = currentLang === 'ru' ? '' : 'none';
+                });
+                
+                // Fix for specific elements with different display types
+                document.querySelectorAll('.nav-links a').forEach(link => {
+                    if (link.classList.contains('lang-' + currentLang)) {
+                        link.style.display = 'block';
+                    } else {
+                        link.style.display = 'none';
+                    }
+                });
+
+                // Fix for buttons that should be inline-block
+                document.querySelectorAll('.btn.lang-' + currentLang).forEach(btn => {
+                    btn.style.display = 'inline-block';
+                });
+
+                // Fix for CV container
+                document.querySelectorAll('.cv-container').forEach(container => {
+                    if (container.classList.contains('lang-' + currentLang)) {
+                        container.style.display = 'block';
+                    } else {
+                        container.style.display = 'none';
+                    }
+                });
+
+                // Remember the user's language preference
+                localStorage.setItem('preferredLanguage', currentLang);
+            });
+
+            // Check for saved language preference
+            const savedLang = localStorage.getItem('preferredLanguage');
+            if (savedLang && savedLang !== 'en') {
+                // Trigger language switch if saved preference is not English
+                langToggle.click();
+            }
         });
     </script>
 </head>
@@ -643,9 +741,18 @@
         <nav>
             <a href="#" class="logo">Arsen Kenesbayev</a>
             <div class="nav-links" id="navLinks">
-                <a href="#projects">Projects</a>
-                <a href="#cv">CV</a>
-                <a href="#contact">Contact</a>
+                <a href="#projects" class="lang-en">Projects</a>
+                <a href="#projects" class="lang-ru" style="display: none;">Проекты</a>
+                <a href="#cv" class="lang-en">CV</a>
+                <a href="#cv" class="lang-ru" style="display: none;">Резюме</a>
+                <a href="#contact" class="lang-en">Contact</a>
+                <a href="#contact" class="lang-ru" style="display: none;">Контакты</a>
+            </div>
+            <div class="language-switcher">
+                <button id="langToggle" class="lang-btn">
+                    <span class="lang-text">EN</span>
+                    <i class="fas fa-globe"></i>
+                </button>
             </div>
             <button class="hamburger" id="hamburger">
                 <i class="fas fa-bars"></i>
@@ -656,16 +763,20 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Hello, I'm <span>Arsen Kenesbayev</span></h1>
-            <p>Software Engineer passionate about creating intuitive, efficient and smart solutions.</p>
-            <a href="#projects" class="btn">View My Projects</a>
+            <h1 class="lang-en">Hello, I'm <span>Arsen Kenesbayev</span></h1>
+            <h1 class="lang-ru" style="display: none;">Привет, я <span>Арсен Кенесбаев</span></h1>
+            <p class="lang-en">Software Engineer passionate about creating intuitive, efficient and smart solutions.</p>
+            <p class="lang-ru" style="display: none;">Разработчик программного обеспечения, увлеченный созданием интуитивных, эффективных и умных решений.</p>
+            <a href="#projects" class="btn lang-en">View My Projects</a>
+            <a href="#projects" class="btn lang-ru" style="display: none;">Посмотреть Проекты</a>
         </div>
         <img src="media/Arsen.jpg" alt="Arsen Kenesbayev" class="profile-img">
     </section>
     
     <!-- Projects Section -->
     <section class="projects" id="projects">
-        <h2 class="section-title">My Projects</h2>
+        <h2 class="section-title lang-en">My Projects</h2>
+        <h2 class="section-title lang-ru" style="display: none;">Мои Проекты</h2>
         <div class="project-cards">
             <!-- Project 1 -->
             <div class="project-card">
@@ -677,8 +788,10 @@
                     </div>
                 </div>
                 <div class="project-content">
-                    <h3 class="project-title">Movie Recommendation System</h3>
-                    <p class="project-description">Built a movie recommender with content-based filtering (TF-IDF + cosine similarity), with ability to watch trailers, user auth, dark/light mode, and an Akinator-style assistant. Processed 5,000+ TMDB movies.</p>
+                    <h3 class="project-title lang-en">Movie Recommendation System</h3>
+                    <h3 class="project-title lang-ru" style="display: none;">Система Рекомендации Фильмов</h3>
+                    <p class="project-description lang-en">Built a movie recommender with content-based filtering (TF-IDF + cosine similarity), with ability to watch trailers, user auth, dark/light mode, and an Akinator-style assistant. Processed 5,000+ TMDB movies.</p>
+                    <p class="project-description lang-ru" style="display: none;">Разработал систему рекомендации фильмов с контентной фильтрацией (TF-IDF + косинусное сходство), с возможностью просмотра трейлеров, авторизацией пользователей, тёмной/светлой темой и помощником в стиле Akinator. Обработано более 5000 фильмов из TMDB.</p>
                     <div class="tech-stack">
                         <span class="tech-tag">Flask</span>
                         <span class="tech-tag">TMDB API</span>
@@ -691,8 +804,10 @@
                     </div>
                     <div class="project-links">
                         <a href="https://github.com/Skyshmallow/Movie-Recommendation-System-for-ML"><i class="fab fa-github"></i> GitHub</a>
-                        <a href="https://www.canva.com/design/DAGnKi5m3TE/lA1QYrb8ai3ZamYxoTOMNg/edit?utm_content=DAGnKi5m3TE&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
-                        <a href="https://www.canva.com/design/DAGYi1dxqsQ/MlkfnETaGHBtzuR4I5AamQ/edit?utm_content=DAGYi1dxqsQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"><i class="fa-solid fa-book"></i>Documentation</a>
+                        <a href="https://www.canva.com/design/DAGnKi5m3TE/lA1QYrb8ai3ZamYxoTOMNg/edit?utm_content=DAGnKi5m3TE&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-en"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
+                        <a href="https://www.canva.com/design/DAGnKi5m3TE/lA1QYrb8ai3ZamYxoTOMNg/edit?utm_content=DAGnKi5m3TE&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-ru" style="display: none;"><i class="fa-solid fa-lightbulb"></i>Презентация</a>
+                        <a href="https://www.canva.com/design/DAGYi1dxqsQ/MlkfnETaGHBtzuR4I5AamQ/edit?utm_content=DAGYi1dxqsQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-en"><i class="fa-solid fa-book"></i>Documentation</a>
+                        <a href="https://www.canva.com/design/DAGYi1dxqsQ/MlkfnETaGHBtzuR4I5AamQ/edit?utm_content=DAGYi1dxqsQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-ru" style="display: none;"><i class="fa-solid fa-book"></i>Документация</a>
                     </div>
                 </div>
             </div>
@@ -706,8 +821,10 @@
                 
                 </div>
                 <div class="project-content">
-                    <h3 class="project-title">Online Bank Database</h3>
-                    <p class="project-description">Designed a Kaspi-style database with normalized schemas for customers, cards, loans, etc. Wrote 30+ optimized queries, added triggers and indexes for speed.</p>
+                    <h3 class="project-title lang-en">Online Bank Database</h3>
+                    <h3 class="project-title lang-ru" style="display: none;">База Данных Онлайн-Банка</h3>
+                    <p class="project-description lang-en">Designed a Kaspi-style database with normalized schemas for customers, cards, loans, etc. Wrote 30+ optimized queries, added triggers and indexes for speed.</p>
+                    <p class="project-description lang-ru" style="display: none;">Разработал базу данных в стиле Kaspi с нормализованными схемами для клиентов, карт, кредитов и т.д. Написал более 30 оптимизированных запросов, добавил триггеры и индексы для повышения скорости.</p>
                     <div class="tech-stack">
                         <span class="tech-tag">Oracle APEX</span>
                         <span class="tech-tag">SQL</span>
@@ -716,8 +833,8 @@
                         <span class="tech-tag">Canva</span>
                     </div>
                     <div class="project-links">
-                        <a href="https://www.canva.com/design/DAGnKrudz-E/Jb7eJfVraFReA8v_S2Mx8w/edit?utm_content=DAGnKrudz-E&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
-                  
+                        <a href="https://www.canva.com/design/DAGnKrudz-E/Jb7eJfVraFReA8v_S2Mx8w/edit?utm_content=DAGnKrudz-E&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-en"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
+                        <a href="https://www.canva.com/design/DAGnKrudz-E/Jb7eJfVraFReA8v_S2Mx8w/edit?utm_content=DAGnKrudz-E&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-ru" style="display: none;"><i class="fa-solid fa-lightbulb"></i>Презентация</a>
                     </div>
                 </div>
             </div>
@@ -732,8 +849,10 @@
                     </div>
                 </div>
                 <div class="project-content">
-                    <h3 class="project-title">DFS Traversal Animation</h3>
-                    <p class="project-description">Created an interactive DFS visualizer with animations, SFX, and embedded YouTube explainer. Responsive design and fully commented source code.</p>
+                    <h3 class="project-title lang-en">DFS Traversal Animation</h3>
+                    <h3 class="project-title lang-ru" style="display: none;">Анимация Алгоритма DFS</h3>
+                    <p class="project-description lang-en">Created an interactive DFS visualizer with animations, SFX, and embedded YouTube explainer. Responsive design and fully commented source code.</p>
+                    <p class="project-description lang-ru" style="display: none;">Создал интерактивный визуализатор алгоритма поиска в глубину с анимациями, звуковыми эффектами и встроенным объяснением с YouTube. Адаптивный дизайн и полностью прокомментированный исходный код.</p>
                     <div class="tech-stack">
                         <span class="tech-tag">HTML</span>
                         <span class="tech-tag">CSS</span>
@@ -742,9 +861,10 @@
                         <span class="tech-tag">GitHub Pages</span>
                     </div>
                     <div class="project-links">
-                        <a href="https://skyshmallow.github.io/algos_project/" target="_blank"><i class="fas fa-external-link-alt"></i> Live Demo</a>
-                        <a href="https://www.canva.com/design/DAGnKrfjVAM/YCGeO-OsgH0m1_y4LjEfcQ/edit?utm_content=DAGnKrfjVAM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
-                  
+                        <a href="https://skyshmallow.github.io/algos_project/" target="_blank" class="lang-en"><i class="fas fa-external-link-alt"></i> Live Demo</a>
+                        <a href="https://skyshmallow.github.io/algos_project/" target="_blank" class="lang-ru" style="display: none;"><i class="fas fa-external-link-alt"></i> Демо</a>
+                        <a href="https://www.canva.com/design/DAGnKrfjVAM/YCGeO-OsgH0m1_y4LjEfcQ/edit?utm_content=DAGnKrfjVAM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-en"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
+                        <a href="https://www.canva.com/design/DAGnKrfjVAM/YCGeO-OsgH0m1_y4LjEfcQ/edit?utm_content=DAGnKrfjVAM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-ru" style="display: none;"><i class="fa-solid fa-lightbulb"></i>Презентация</a>
                     </div>
                 </div>
             </div>
@@ -758,8 +878,10 @@
                   </div>
               </div>
               <div class="project-content">
-                  <h3 class="project-title">Qysqa</h3>
-                  <p class="project-description">AI learning platform, creates open/closed tests and evaluates answers, allows user to upload multiple types of data(.txt .pptx .pdf .docx youtube-video etc.) and ask questions about selected data</p>
+                  <h3 class="project-title lang-en">Qysqa</h3>
+                  <h3 class="project-title lang-ru" style="display: none;">Qysqa</h3>
+                  <p class="project-description lang-en">AI learning platform, creates open/closed tests and evaluates answers, allows user to upload multiple types of data(.txt .pptx .pdf .docx youtube-video etc.) and ask questions about selected data</p>
+                  <p class="project-description lang-ru" style="display: none;">Платформа для обучения с ИИ, создаёт открытые/закрытые тесты и оценивает ответы, позволяет пользователю загружать различные типы данных (.txt .pptx .pdf .docx youtube-видео и т.д.) и задавать вопросы по выбранным данным</p>
                   <div class="tech-stack">
                       <span class="tech-tag">HTML/CSS/JS</span>
                       <span class="tech-tag">Gemini API</span>
@@ -770,7 +892,8 @@
                   </div>
                   <div class="project-links">
                     <a href="https://github.com/Skyshmallow/qysqa"><i class="fab fa-github"></i> GitHub</a>
-                    <a href="https://www.canva.com/design/DAGnKoFN27Q/z6sDIdcEZAHixtGoYherAw/edit?utm_content=DAGnKoFN27Q&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
+                    <a href="https://www.canva.com/design/DAGnKoFN27Q/z6sDIdcEZAHixtGoYherAw/edit?utm_content=DAGnKoFN27Q&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-en"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
+                    <a href="https://www.canva.com/design/DAGnKoFN27Q/z6sDIdcEZAHixtGoYherAw/edit?utm_content=DAGnKoFN27Q&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="lang-ru" style="display: none;"><i class="fa-solid fa-lightbulb"></i>Презентация</a>
                   </div>
               </div>
           </div>
@@ -787,8 +910,10 @@
                 </div>
             </div>
             <div class="project-content">
-                <h3 class="project-title">AI human tracking camera</h3>
-                <p class="project-description">Working on it's own power supply Camera with API to manual control and AI tracking of human and voice control</p>
+                <h3 class="project-title lang-en">AI human tracking camera</h3>
+                <h3 class="project-title lang-ru" style="display: none;">Камера с ИИ-отслеживанием человека</h3>
+                <p class="project-description lang-en">Working on it's own power supply Camera with API to manual control and AI tracking of human and voice control</p>
+                <p class="project-description lang-ru" style="display: none;">Камера с собственным источником питания, API для ручного управления, ИИ-отслеживанием человека и голосовым управлением</p>
                 <div class="tech-stack">
                     <span class="tech-tag">Esp32</span>
                     <span class="tech-tag">Arduino Uno</span>
@@ -800,10 +925,11 @@
                     <!-- <span class="tech-tag">GitHub Pages</span> -->
                 </div>
                 <div class="project-links">
-                    <a href="https://youtu.be/XqcitDN1cJ0?si=n_tiQgsUzuvXvrtY" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
+                    <a href="https://youtu.be/XqcitDN1cJ0?si=n_tiQgsUzuvXvrtY" target="_blank" class="lang-en"><i class="fab fa-youtube"></i> YouTube</a>
+                    <a href="https://youtu.be/XqcitDN1cJ0?si=n_tiQgsUzuvXvrtY" target="_blank" class="lang-ru" style="display: none;"><i class="fab fa-youtube"></i> YouTube</a>
                     <a href="https://github.com/Skyshmallow/esp32-cam" target="_blank"><i class="fab fa-github"></i> Github</a>
-                    <a href="https://www.canva.com/design/DAGmRnk1kqE/oPWG_Vj-OcQYo4zj-ceDEQ/view?utm_content=DAGmRnk1kqE&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h3bfc266085"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
-              
+                    <a href="https://www.canva.com/design/DAGmRnk1kqE/oPWG_Vj-OcQYo4zj-ceDEQ/view?utm_content=DAGmRnk1kqE&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h3bfc266085" class="lang-en"><i class="fa-solid fa-lightbulb"></i>Presentation</a>
+                    <a href="https://www.canva.com/design/DAGmRnk1kqE/oPWG_Vj-OcQYo4zj-ceDEQ/view?utm_content=DAGmRnk1kqE&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h3bfc266085" class="lang-ru" style="display: none;"><i class="fa-solid fa-lightbulb"></i>Презентация</a>
                 </div>
             </div>
         </div>
@@ -819,8 +945,10 @@
                 </div>
             </div>
             <div class="project-content">
-                <h3 class="project-title">Gesture control drawing</h3>
-                <p class="project-description">Created an AI-powered hand gesture drawing application that tracks hand movements to create digital art. The system detects finger positions in real-time and translates them into drawing commands or eraser.</p>
+                <h3 class="project-title lang-en">Gesture control drawing</h3>
+                <h3 class="project-title lang-ru" style="display: none;">Рисование с помощью жестов</h3>
+                <p class="project-description lang-en">Created an AI-powered hand gesture drawing application that tracks hand movements to create digital art. The system detects finger positions in real-time and translates them into drawing commands or eraser.</p>
+                <p class="project-description lang-ru" style="display: none;">Создал приложение для рисования жестами на основе ИИ, которое отслеживает движения рук для создания цифрового искусства. Система определяет положение пальцев в реальном времени и преобразует их в команды рисования или ластик.</p>
                 <div class="tech-stack">
                     <span class="tech-tag">Python</span>
                     <span class="tech-tag">OpenCV</span>
@@ -828,7 +956,8 @@
                     <span class="tech-tag">Computer Vision</span>
                 </div>
                 <div class="project-links">
-                    <a href="https://www.instagram.com/p/DFf4ZYFsIH_/" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+                    <a href="https://www.instagram.com/p/DFf4ZYFsIH_/" target="_blank" class="lang-en"><i class="fab fa-instagram"></i> Instagram</a>
+                    <a href="https://www.instagram.com/p/DFf4ZYFsIH_/" target="_blank" class="lang-ru" style="display: none;"><i class="fab fa-instagram"></i> Instagram</a>
                 </div>
             </div>
         </div>
@@ -838,18 +967,24 @@
     
     <!-- CV Section -->
     <section class="cv-section" id="cv">
-        <h2 class="section-title">My CV</h2>
-        <div class="cv-container">
+        <h2 class="section-title lang-en">My CV</h2>
+        <h2 class="section-title lang-ru" style="display: none;">Моё Резюме</h2>
+        <div class="cv-container lang-en">
             <iframe loading="lazy" src="https://www.canva.com/design/DAGlLilZ1e4/bu_Sw1hBv9NzbptBlZt31g/view?embed" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>
         </div>
+        <div class="cv-container lang-ru" style="display: none;">
+            <iframe loading="lazy" src="https://www.canva.com/design/DAGl_3zfLk0/H7VP5SHqrubhFBrHfwNJYw/view?embed" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>
+        </div>
         <div style="text-align: center; margin-top: 30px;">
-            <a href="media/Arsen_CV.pdf" download class="btn btn2">Download CV</a>
+            <a href="media/Arsen_CV.pdf" download class="btn btn2 lang-en">Download CV</a>
+            <a href="media/Arsen_CV_RU.pdf" download class="btn btn2 lang-ru" style="display: none;">Скачать Резюме</a>
         </div>
     </section>
     
     <!-- Contact Section -->
     <section class="contact" id="contact">
-        <h2 class="section-title">Contact Me</h2>
+        <h2 class="section-title lang-en">Contact Me</h2>
+        <h2 class="section-title lang-ru" style="display: none;">Свяжитесь Со Мной</h2>
         <div class="contact-info">
             <p>
                 <i class="fas fa-paper-plane"></i>
@@ -859,9 +994,13 @@
                 <i class="fas fa-phone-square"></i>
                 +7707 446 6793
             </p>
-            <p>
+            <p class="lang-en">
                 <i class="fas fa-map-marker-alt"></i>
                 Almaty, Kazakhstan
+            </p>
+            <p class="lang-ru" style="display: none;">
+                <i class="fas fa-map-marker-alt"></i>
+                Алматы, Казахстан
             </p>
             
             <div class="social-icons">
@@ -888,8 +1027,10 @@
     <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <p>&copy; 2025 Arsen Kenesbayev. All Rights Reserved.</p>
-            <p>Made with <i class="fas fa-heart" style="color: var(--accent-blue);"></i> and passion for development</p>
+            <p class="lang-en">&copy; 2025 Arsen Kenesbayev. All Rights Reserved.</p>
+            <p class="lang-ru" style="display: none;">&copy; 2025 Арсен Кенесбаев. Все права защищены.</p>
+            <p class="lang-en">Made with <i class="fas fa-heart" style="color: var(--accent-blue);"></i> and passion for development</p>
+            <p class="lang-ru" style="display: none;">Сделано с <i class="fas fa-heart" style="color: var(--accent-blue);"></i> и страстью к разработке</p>
         </div>
     </footer>
 </body>
