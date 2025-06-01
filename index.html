@@ -194,19 +194,25 @@
             height: 200px;
             overflow: hidden;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--card-bg);
         }
         
         .project-media img, 
         .project-media video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
             transition: transform 0.5s ease;
         }
         
         .project-media:hover img,
         .project-media:hover video {
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
         
         .media-placeholder {
@@ -218,6 +224,14 @@
             justify-content: center;
             font-size: 24px;
             color: #555;
+        }
+        
+        .media-placeholder img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
         
         .project-content {
@@ -882,6 +896,141 @@
                 min-height: 400px;
             }
         }
+
+        /* Lightbox Modal Styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lightbox-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox.active .lightbox-content {
+            transform: scale(1);
+        }
+
+        .lightbox-image {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 1001;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .lightbox-title {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            max-width: 80%;
+            z-index: 1001;
+        }
+
+        /* Make project images clickable */
+        .project-media img {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .project-media img:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        /* Disable hover effects on mobile devices */
+        @media (max-width: 768px) {
+            .project-media img {
+                cursor: default;
+            }
+            
+            .project-media img:hover {
+                transform: none;
+                filter: none;
+            }
+        }
+
+        /* Mobile adjustments for lightbox */
+        @media (max-width: 768px) {
+            .lightbox-close {
+                top: 15px;
+                right: 15px;
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+            .lightbox-title {
+                bottom: 15px;
+                font-size: 1rem;
+                padding: 8px 16px;
+                max-width: 90%;
+            }
+
+            .lightbox-content {
+                width: 100%;
+                height: 100%;
+            }
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1453,10 +1602,114 @@
                     }
                 }
             });
+
+            // === LIGHTBOX FUNCTIONALITY ===
+            
+            // Check if device is mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+            
+            // Only initialize lightbox on desktop devices
+            if (!isMobile) {
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImage = document.getElementById('lightboxImage');
+                const lightboxTitle = document.getElementById('lightboxTitle');
+                const lightboxClose = document.getElementById('lightboxClose');
+
+                // Function to open lightbox
+                function openLightbox(imageSrc, imageAlt, projectTitle) {
+                    lightboxImage.src = imageSrc;
+                    lightboxImage.alt = imageAlt;
+                    lightboxTitle.textContent = projectTitle || imageAlt;
+                    
+                    // Prevent body scroll
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Show lightbox with animation
+                    lightbox.style.display = 'flex';
+                    requestAnimationFrame(() => {
+                        lightbox.classList.add('active');
+                    });
+
+                    // Track lightbox view
+                    trackEvent('image_lightbox_open', {
+                        imageName: imageSrc.split('/').pop(),
+                        projectTitle: projectTitle || imageAlt,
+                        language: currentLang
+                    });
+                }
+
+                // Function to close lightbox
+                function closeLightbox() {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = '';
+                    
+                    setTimeout(() => {
+                        lightbox.style.display = 'none';
+                        lightboxImage.src = '';
+                    }, 300);
+
+                    trackEvent('image_lightbox_close');
+                }
+
+                // Add click handlers to all project images (desktop only)
+                document.querySelectorAll('.project-media img').forEach(img => {
+                    img.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        
+                        // Get project title from the same card
+                        const projectCard = this.closest('.project-card');
+                        const titleElement = projectCard.querySelector(`.project-title.lang-${currentLang}:not([style*="display: none"]), .project-title:not(.lang-en):not(.lang-ru)`);
+                        const projectTitle = titleElement ? titleElement.textContent.trim() : '';
+                        
+                        openLightbox(this.src, this.alt, projectTitle);
+                    });
+                });
+
+                // Close lightbox when clicking close button
+                lightboxClose.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    closeLightbox();
+                });
+
+                // Close lightbox when clicking outside the image
+                lightbox.addEventListener('click', function(e) {
+                    if (e.target === lightbox) {
+                        closeLightbox();
+                    }
+                });
+
+                // Close lightbox with ESC key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                        closeLightbox();
+                    }
+                });
+
+                // Prevent lightbox content clicks from closing
+                document.querySelector('.lightbox-content').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            } else {
+                // On mobile devices, remove cursor pointer and hover effects from images
+                document.querySelectorAll('.project-media img').forEach(img => {
+                    img.style.cursor = 'default';
+                });
+            }
         });
     </script>
 </head>
 <body>
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <img class="lightbox-image" id="lightboxImage" src="" alt="">
+            <button class="lightbox-close" id="lightboxClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="lightbox-title" id="lightboxTitle"></div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header>
         <nav>
@@ -1521,7 +1774,7 @@
                 <div class="project-media">
                     <div class="media-placeholder">
                         <!-- <i class="fas fa-film"></i> -->
-                        <img src="media/popcorn (1).png" alt="DFS Traversal Animation" style="width: 100%; height: auto; object-fit: cover;">
+                        <img src="media/popcorn (1).png" alt="DFS Traversal Animation">
                 
                     </div>
                 </div>
@@ -1554,7 +1807,7 @@
             <div class="project-card">
                 <div class="project-media">
                   <div class="media-placeholder">
-                    <img src="media/p_bank.png" alt="DFS Traversal Animation" style="width: 100%; height: auto; object-fit: cover;">
+                    <img src="media/p_bank.png" alt="DFS Traversal Animation">
                 </div>
                 
                 </div>
@@ -1582,7 +1835,7 @@
                 <div class="project-media">
                     <div class="media-placeholder">
                         <!-- <i class="fas fa-code"></i> -->
-                        <img src="media/algorithm.png" alt="DFS Traversal Animation" style="width: 100%; height: auto; object-fit: cover;">
+                        <img src="media/algorithm.png" alt="DFS Traversal Animation">
                 
                     </div>
                 </div>
@@ -1611,7 +1864,7 @@
             <div class="project-card">
               <div class="project-media">
                   <div class="media-placeholder">
-                      <img src="media/qysqa.png" alt="DFS Traversal Animation" style="width: 100%; height: auto; object-fit: cover;">
+                      <img src="media/qysqa.png" alt="DFS Traversal Animation">
                 
                   </div>
               </div>
@@ -1643,7 +1896,7 @@
             <div class="project-media">
                 <div class="media-placeholder">
                     <!-- <i class="fas fa-code"></i> -->
-                    <img src="media/esp32.jpg" alt="DFS Traversal Animation" style="width: 100%; height: auto; object-fit: cover;">
+                    <img src="media/esp32.jpg" alt="DFS Traversal Animation">
             
                 </div>
             </div>
@@ -1679,7 +1932,7 @@
             <div class="project-media">
                 <div class="media-placeholder">
                     
-                    <img src="media/gesture.jpg" alt="Gesture Control Drawing" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="media/gesture.jpg" alt="Gesture Control Drawing">
                 </div>
             </div>
             <div class="project-content">
@@ -1704,7 +1957,7 @@
         <div class="project-card">
             <div class="project-media">
                 <div class="media-placeholder">
-                    <img src="media/portfolio.png" alt="Personal Portfolio Website" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="media/portfolio.png" alt="Personal Portfolio Website">
                 </div>
             </div>
             <div class="project-content">
@@ -1715,7 +1968,6 @@
                 <div class="tech-stack">
                     <span class="tech-tag">HTML/CSS/JS</span>
                     <span class="tech-tag">Google Sheets API</span>
-                    <span class="tech-tag">Google Forms</span>
                     <span class="tech-tag">Google Forms</span>
                     <span class="tech-tag">Google Apps Script</span>
                     <span class="tech-tag">Analytics</span>
@@ -1728,6 +1980,43 @@
                 </div>
             </div>
         </div>
+
+
+
+        <!-- Fisherman -->
+        <div class="project-card">
+            <div class="project-media">
+                <div class="media-placeholder">
+                    <img src="media/Fisherman.jpg" alt="Fisherman app">
+                </div>
+            </div>
+            <div class="project-content">
+                <h3 class="project-title lang-en">Fisherman App</h3>
+                <h3 class="project-title lang-ru" style="display: none;">Приложение для рыбака</h3>
+                
+                <p class="project-description lang-en">Fisherman is an Android application developed using Android Studio. It features both light and dark themes, adjustable text size for better accessibility, and voice search powered by Google Speech Services. This project demonstrates skills in Android UI design, activity lifecycle management, and integration of voice-based interaction.</p>
+                <p class="project-description lang-ru" style="display: none;">Fisherman — это Android-приложение, разработанное в Android Studio. В нём реализованы светлая и тёмная темы, настройка размера текста для удобства пользователей, а также голосовой поиск с использованием Google Speech Services. Проект демонстрирует навыки в создании UI, управлении жизненным циклом активностей и интеграции голосового управления.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-tag">Android Studio</span>
+                    <span class="tech-tag">XML</span>
+                    <span class="tech-tag">Java</span>
+                    <span class="tech-tag">Google Speech Services</span>
+                    <span class="tech-tag">Gradle</span>
+                </div>
+                
+                <div class="project-links">
+                    <a href="https://github.com/Skyshmallow/Fisherman" target="_blank">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                    <a href="https://youtube.com/shorts/ySeRwMbyQSw?si=3eVpu5sxlmrunGiD" target="_blank">
+                        <i class="fab fa-youtube"></i> YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
 
         </div>
         
@@ -1753,27 +2042,7 @@
             <a href="media/Arsen_CV_RU.pdf" download class="btn btn2 lang-ru" style="display: none;">Скачать Резюме</a>
         </div>
 
-        <!-- Survey Section -->
-        <!-- <div class="survey-section">
-            <div class="survey-header">
-                <h3 class="survey-title lang-en">📝 Help Me Improve!</h3>
-                <h3 class="survey-title lang-ru" style="display: none;">📝 Помогите Мне Улучшиться!</h3>
-                <p class="survey-description lang-en">Your feedback is valuable! Please take a moment to share your thoughts about my portfolio and help me create better experiences.</p>
-                <p class="survey-description lang-ru" style="display: none;">Ваш отзыв очень важен! Пожалуйста, уделите немного времени и поделитесь своими мыслями о моем портфолио, чтобы помочь мне создавать лучший опыт.</p>
-            </div>
-            
-            <div class="survey-container">
-                <div class="survey-iframe-wrapper">
-                    <iframe class="survey-iframe lang-en" src="https://docs.google.com/forms/d/e/1FAIpQLSfWt-FipWhs4bks4K14a2TCXW9NBVwwgZ8QJ5RCw54dwaenSQ/viewform?embedded=true" height="500" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-                    <iframe class="survey-iframe lang-ru" style="display: none;" src="https://docs.google.com/forms/d/e/1FAIpQLSfZBPj6Xa5uDi7ShmG8QqwBYSKw1qCQ9Uni4f-x4BY9oVuasg/viewform?embedded=true" height="500" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-                </div>
-            </div>
-            
-            <div class="survey-footer">
-                <p class="lang-en">✨ Thank you for taking the time to provide feedback!</p>
-                <p class="lang-ru" style="display: none;">✨ Спасибо, что нашли время оставить отзыв!</p>
-            </div>
-        </div> -->
+        
     </section>
     
     <!-- Contact Section -->
